@@ -38,6 +38,27 @@ C:\Program Files\StartupMonitor64
 
 ---
 
+Registry and folders that are monitored:
+---------------------------------------
+
+**Registry keys:**
+
+- `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
+
+**64-bit:**
+- `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
+
+**32-bit:**
+- `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run`
+- `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce`
+
+**Startup folders:**
+- All Users: `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup`
+- Current User: `C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`
+
+
 ## Credits
-- Original concept: [Mike Lin – StartupMonitor (2004)](http://www.mlin.net/StartupMonitor.shtml)  
-- Updated and reimplemented for 64-bit Windows by the community.
+- Original concept: [Mike Lin – StartupMonitor (2004)](old homepage: http://www.mlin.net/StartupMonitor.shtml)  
+- Updated and reimplemented for 64-bit Windows by Niklas Holmgren.
