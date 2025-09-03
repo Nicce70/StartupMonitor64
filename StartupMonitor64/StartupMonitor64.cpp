@@ -5,6 +5,8 @@
 #include <shlobj.h>   // SHGetKnownFolderPath
 #include <vector>
 #include <bcrypt.h>
+#include <shlwapi.h>  // För PathRemoveFileSpecW
+#pragma comment(lib, "shlwapi.lib")
 
 // Struktur för snapshot
 using RegistryMap = std::map<std::wstring, std::wstring>;
@@ -55,6 +57,15 @@ RegistryMap ReadRegistry(HKEY hRoot, const wchar_t* subKey, REGSAM flag) {
     return result;
 }
 
+// Hjälpfunktion: returnerar mappen där nuvarande exe ligger
+std::wstring GetModuleFolder()
+{
+    wchar_t path[MAX_PATH];
+    GetModuleFileNameW(NULL, path, MAX_PATH);
+    PathRemoveFileSpecW(path);
+    return std::wstring(path);
+}
+
 //------------------------------------------------------
 // Startar delete-programmet med admin via ShellExecute:
 //------------------------------------------------------
@@ -69,10 +80,13 @@ bool LaunchDeleteProcessAndCheck(HKEY hRoot, const std::wstring& subKey, const s
     // Skicka med root, subKey och valueName korrekt med citattecken
     std::wstring args = rootStr + L" \"" + subKey + L"\" \"" + valueName + L"\"";
 
+    // Bygg full sökväg till SM64_Delete.exe
+    std::wstring exePath = GetModuleFolder() + L"\\SM64_Delete.exe";
+
     SHELLEXECUTEINFOW sei = { sizeof(sei) };
     sei.fMask = SEE_MASK_NOCLOSEPROCESS;
     sei.lpVerb = L"runas";
-    sei.lpFile = L"SM64_Delete.exe";
+    sei.lpFile = exePath.c_str();   // <-- Full path används här
     sei.lpParameters = args.c_str();
     sei.nShow = SW_HIDE;
 
@@ -91,7 +105,11 @@ bool LaunchDeleteProcessAndCheck(HKEY hRoot, const std::wstring& subKey, const s
     }
 
     // Kolla om posten fortfarande finns i registret
-    RegistryMap snapshotCheck = ReadRegistry(hRoot, subKey.c_str(), (hRoot == HKEY_LOCAL_MACHINE) ? KEY_WOW64_64KEY : KEY_WOW64_64KEY);
+    RegistryMap snapshotCheck = ReadRegistry(
+        hRoot,
+        subKey.c_str(),
+        (hRoot == HKEY_LOCAL_MACHINE) ? KEY_WOW64_64KEY : KEY_WOW64_64KEY);
+
     bool stillExists = (snapshotCheck.find(valueName) != snapshotCheck.end());
 
     if (stillExists) {
@@ -106,6 +124,7 @@ bool LaunchDeleteProcessAndCheck(HKEY hRoot, const std::wstring& subKey, const s
     ReleaseMutex(hMutex);
     return !stillExists; // true = raderad
 }
+
 
 
 //--------------------------
